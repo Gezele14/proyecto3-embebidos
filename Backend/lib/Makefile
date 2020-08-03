@@ -1,13 +1,14 @@
-#Util Library
-UTIL = util
-SRC_UTIL = $(UTIL).c 
-OBJ_UTIL= $(UTIL).o
-LIB_UTIL = lib$(UTIL).a
+BIB = lcd_i2c
+SRC = lcd_i2c.c gpio.c
 
-
-FLAGS= -lm
+CFLAGS = -c -Wall
+DIRH = ../include
 
 build:
-	$(CC) -O -c $(SRC_UTIL) -Wall
-	$(AR) rv $(LIB_UTIL) $(OBJ_UTIL)
-	$(RANLIB) $(LIB_UTIL)
+		$(CC) $(CFLAGS) $(SRC) -I$(DIRH) -O -Wall -fPIC
+		$(LD) -o lib$(BIB).so lcd_i2c.o gpio.o -shared
+		
+
+clean:
+		rm ./lib$(BIB).so ./lcd_i2c.o ./gpio.o
+

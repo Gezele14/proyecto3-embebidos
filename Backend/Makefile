@@ -1,5 +1,7 @@
-Compile: makeSRC
 
-makeSRC:
-		(cd src; make)
+build:
+		cd lib && make
+		cd src && make
+
+
 
