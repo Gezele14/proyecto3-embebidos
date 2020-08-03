@@ -29,6 +29,9 @@ extern "C"
 #ifdef __cplusplus
 }
 #endif
+#include <recognize.hpp>
+
+ const char *filepath = "./images/image.png";
 
 /**
  * Definition of callbacks 
@@ -55,8 +58,8 @@ int main(void)
   //initializes instance of the aerver
   struct _u_instance instance;
 
-  setCursor(2, 1);
-  i2c_write_str("hola");
+  setCursor(0, 1);
+  i2c_write_str("-");
 
   // Initialize instance with the port number
   if (ulfius_init_instance(&instance, PORT, NULL, NULL) != U_OK)
@@ -116,13 +119,28 @@ int callback_hello_world(const struct _u_request *request, struct _u_response *r
 int callback_upload_file(const struct _u_request *request, struct _u_response *response, void *user_data)
 {
   //Paths
-  const char **keys, *fileName, *fileContent, *filepath;
+  const char **keys, *fileName, *fileContent;
 
-  filepath = "../assets/images/image.png";
 
   printf("Hola de nuevo\n");
-  // system((const char *)"rm ../assets/images/image.png");
+  int predictedLevel =-1;
+  double confidence=0;
+  predict(filepath,predictedLevel,confidence);
 
+  system((std::string("rm ")+ std::string(filepath)).c_str());
+  void clear();
+  void home();
+  setCursor(0,0);
+  i2c_write_str((std::string("label: ")+std::to_string(predictedLevel)).c_str());
+  if(confidence > 400 || predictedLevel!=2){
+    ulfius_set_response_properties(response, U_OPT_STATUS, 400,U_OPT_NONE);
+    i2c_write_str("acceso denegado");
+  }
+  else
+  {
+    ulfius_set_response_properties(response, U_OPT_STATUS, 200,U_OPT_NONE);
+    i2c_write_str("permitido");
+  }
   return U_OK;
 }
 
@@ -136,7 +154,6 @@ int file_upload_callback(const struct _u_request *request,
                          size_t size,
                          void *cls)
 {
-  const char *filepath = "../assets/images/image.png";
 
   FILE *file;
 
