@@ -40,8 +40,7 @@ int file_upload_callback (const struct _u_request * request,
                           const char * data, 
                           uint64_t off, 
                           size_t size, 
-                          void * user_data);
-
+                          void * cls);
 
 /**
  * main function
@@ -60,9 +59,14 @@ int main(void) {
   // Max post param size is 16 Kb, which means an uploaded file is no more than 16 Kb
   instance.max_post_param_size = 10000*1024;
 
+
   // Endpoint list declaration
   ulfius_add_endpoint_by_val(&instance, "GET", PREFIX, "/hello", 0, &callback_hello_world, NULL);
   ulfius_add_endpoint_by_val(&instance, "*", FILE_PREFIX, NULL, 0, &callback_upload_file, NULL);
+
+  if (ulfius_set_upload_file_callback_function(&instance, &file_upload_callback, NULL) != U_OK) {
+    printf("Error ulfius_set_upload_file_callback_function\n");
+  }
 
   // Start the framework
   if (ulfius_start_framework(&instance) == U_OK) {
@@ -101,31 +105,30 @@ int callback_upload_file(const struct _u_request * request, struct _u_response *
   const char **keys,*fileName, *fileContent, *filepath;
 
   filepath = "../assets/images/image.png";
-  
-  size_t len;
-  keys = u_map_enum_keys(request->map_post_body);
 
-  for (int i = 0; keys[i] != NULL; i++) {
-      if (strcmp(keys[i], "file") == 0) {
-          len = u_map_get_length(request->map_post_body, keys[i]);
-      }
-  }
+  printf("Hola de nuevo\n");
+  // system((const char *)"rm ../assets/images/image.png");
 
-  char peer_addr_str[ INET_ADDRSTRLEN ];
-  inet_ntop( AF_INET, &request->client_address->sa_data, peer_addr_str, INET_ADDRSTRLEN );
+  return U_OK;
+}
 
-  fileContent = strstr((const char*)request->binary_body, "\r\n\r\n");
-  fileContent += 4;
 
-  FILE *fp;
-  if ((fp = fopen(filepath, "wb")) == NULL) {
-      return U_ERROR;
-  }
+int file_upload_callback (const struct _u_request * request, 
+                          const char * key, 
+                          const char * filename, 
+                          const char * content_type, 
+                          const char * transfer_encoding, 
+                          const char * data, 
+                          uint64_t off, 
+                          size_t size, 
+                          void * cls) {
+  const char * filepath = "../assets/images/image.png";
 
-  if ((fwrite(fileContent, 1, len - 1, fp)) != len - 1) {
-      return U_ERROR;
-  }
-  fclose(fp);
+  FILE * file;
 
+  printf("Escribiendo %d bytes\n",size);
+  file=fopen(filepath,"ab");
+  fwrite(data, size, 1, file);
+  fclose(file);
   return U_OK;
 }
