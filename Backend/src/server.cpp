@@ -131,7 +131,7 @@ int callback_upload_file(const struct _u_request *request, struct _u_response *r
   void clear();
   void home();
   setCursor(0,0);
-  i2c_write_str((std::string("label: ")+std::to_string(predictedLevel)).c_str());
+  
   if(confidence > 400 || predictedLevel!=2){
     ulfius_set_response_properties(response, U_OPT_STATUS, 400,U_OPT_NONE);
     i2c_write_str("acceso denegado");
