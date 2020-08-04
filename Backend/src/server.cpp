@@ -85,10 +85,7 @@ int main(void)
   {
     printf("Start framework on port %d\n", instance.port);
 
-    while (1)
-    {
-      sleep(100);
-    }
+    getchar();
   }
   else
   {
@@ -125,8 +122,11 @@ int callback_upload_file(const struct _u_request *request, struct _u_response *r
   printf("Hola de nuevo\n");
   int predictedLevel =-1;
   double confidence=0;
-  predict(filepath,predictedLevel,confidence);
-
+  try{
+    predict(filepath,predictedLevel,confidence);
+  }catch (std::exception& e){
+    std::cerr<<"fallo predict"<<e.what()<<std::endl;
+  }
   system((std::string("rm ")+ std::string(filepath)).c_str());
   void clear();
   void home();
