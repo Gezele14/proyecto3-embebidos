@@ -139,7 +139,7 @@ int callback_upload_file(const struct _u_request *request, struct _u_response *r
   else
   {
     ulfius_set_response_properties(response, U_OPT_STATUS, 200,U_OPT_NONE);
-    i2c_write_str("permitido");
+    i2c_write_str("permitido       ");
   }
   return U_OK;
 }
