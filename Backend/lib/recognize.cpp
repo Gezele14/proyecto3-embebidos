@@ -1,32 +1,5 @@
 
-#include "opencv2/opencv.hpp"
-#include "opencv2/highgui/highgui.hpp"
-#include <opencv2/face.hpp>
-
-#include <iostream>
-#include <fstream>
-#include <sstream>
-static void read_file_in(const std::string &filename, std::vector<cv::Mat> &images)
-{
-    std::ifstream file(filename.c_str(), std::ifstream::in);
-    if (!file)
-    {
-        std::string error_message = "No valid input file was given, please check the given filename.";
-        std::cerr << error_message << std::endl;
-        exit(1);
-    }
-    std::string line, path;
-    while (getline(file, line))
-    {
-        std::stringstream liness(line);
-        getline(liness, path);
-        if (!path.empty())
-        {
-            std::cout<<"path: " << path << "\n";
-            images.push_back(cv::imread(path));
-        }
-    }
-}
+#include <recognize.hpp>
 
 cv::Mat getFace(cv::Mat image_In)
 {
@@ -56,11 +29,10 @@ cv::Mat getFace(cv::Mat image_In)
     return image_gray_crop;
 }
 
-int main(int argc, char const *argv[])
+void predict(const char* path_in, int &predictedLabel, double &confidence)
 {
     
     cv::Mat img_in;
-    const char* path_in = argv[1];
 
     std::cout<<"path img in: "<< path_in<<std::endl;
     img_in=cv::imread(path_in);
@@ -70,13 +42,10 @@ int main(int argc, char const *argv[])
 
     cv::Ptr<cv::face::FaceRecognizer> model = cv::face::FisherFaceRecognizer::create();
     model->read("trained_model");
-    int predictedLabel = -1;
-    double confidence = 0.0;
+    predictedLabel = -1;
+    confidence = 0.0;
     model->predict(img_in, predictedLabel, confidence);
 
     std::string result_message = cv::format("Predicted class = %d / confidence = %f", predictedLabel,confidence);
     std::cout << result_message << std::endl;
-
-
-//cv::waitKey(0);
 }
