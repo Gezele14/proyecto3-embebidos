@@ -53,6 +53,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 
 import com.google.android.gms.instantapps.InstantApps;
+import com.loopj.android.http.AsyncHttpClient;
+import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
 import com.loopj.android.http.SyncHttpClient;
 import com.loopj.android.http.TextHttpResponseHandler;
@@ -65,7 +67,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 
-import cz.msebera.android.httpclient.entity.mime.Header;
+import cz.msebera.android.httpclient.Header;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -212,29 +214,51 @@ public class MainActivity extends AppCompatActivity {
                 Thread t = new Thread(){
                     public void run(){
                         try {
-                            SyncHttpClient client = new SyncHttpClient();
+                            AsyncHttpClient client = new AsyncHttpClient();
                             RequestParams params = new RequestParams();
                             params.put("file", new File(jpgPath));
-
-                            client.post(url, params, new TextHttpResponseHandler() {
+                            client.setTimeout(60000);
+                            //client.setResponseTimeout(20000);
+                            //client.setConnectTimeout(60000);
+                            client.post(url, params, new AsyncHttpResponseHandler() {
                                 @Override
-                                public void onFailure(int statusCode, cz.msebera.android.httpclient.Header[] headers, String responseString, Throwable throwable) {
+                                public void onSuccess(int statusCode, cz.msebera.android.httpclient.Header[] headers, byte[] responseBody) {
                                     findViewById(R.id.loadingPanel).setVisibility(View.INVISIBLE);
-                                    showToast("Error HTTP");
+                                    showToast("Acceso Permitido");
+
                                 }
 
                                 @Override
-                                public void onSuccess(int statusCode, cz.msebera.android.httpclient.Header[] headers, String responseString) {
+                                public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
                                     findViewById(R.id.loadingPanel).setVisibility(View.INVISIBLE);
-                                    showToast("Imagen Enviada");
+                                    showToast("Acceso Denegado");
+
                                 }
+
+                                // ----New Overridden method
+                                @Override
+                                public boolean getUseSynchronousMode() {
+                                    return false;
+                                }
+
+                                //@Override
+                                //public void onFailure(int statusCode, cz.msebera.android.httpclient.Header[] headers, String responseString, Throwable throwable) {
+                                //    findViewById(R.id.loadingPanel).setVisibility(View.INVISIBLE);
+                                //   showToast("Error HTTP");
+                                //}
+
+                                //@Override
+                                //public void onSuccess(int statusCode, cz.msebera.android.httpclient.Header[] headers, String responseString) {
+                                //   findViewById(R.id.loadingPanel).setVisibility(View.INVISIBLE);
+                                //  showToast("Imagen Enviada");
+                                //}
                             });
 
 
                         } catch (Exception e){
                             Log.e("log_tag", "Error in http connection " + e.toString());
                             findViewById(R.id.loadingPanel).setVisibility(View.INVISIBLE);
-                            showToast("Error HTTP");
+                            showToast("CATCH HTTP");
                         }
                     }
                 };
@@ -443,7 +467,7 @@ public class MainActivity extends AppCompatActivity {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                Toast.makeText(MainActivity.this, toast, Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this, toast, Toast.LENGTH_LONG).show();
             }
         });
     }
